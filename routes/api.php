@@ -18,5 +18,5 @@ Route::post('register', 'API\UserController@register');
 
 Route::middleware('auth:api')->group(function () {
     Route::get('/me', 'API\UserController@details');
-    Route::post('/places','API\PlaceController@search');
+    Route::get('/places','API\PlaceController@search');
 });
