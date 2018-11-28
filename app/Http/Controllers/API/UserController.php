@@ -64,6 +64,10 @@ class UserController extends Controller
     public function details()
     {
         $user = Auth::user();
-        return response()->json(['success' => $user], $this-> successStatus);
+        $user_with_reviews = User::with(['reviews' => function($query) {
+          $query->orderBy('created_at', 'desc');
+        }])->find($user->id);
+        
+        return response()->json(['success' => $user_with_reviews], $this-> successStatus);
     }
 }

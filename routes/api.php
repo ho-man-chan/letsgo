@@ -19,4 +19,5 @@ Route::post('register', 'API\UserController@register');
 Route::middleware('auth:api')->group(function () {
     Route::get('/me', 'API\UserController@details');
     Route::get('/places','API\PlaceController@search');
+    Route::get('/recommend', 'API\RecommendController@index');    Route::post('/review', 'API\ReviewController@store');    
 });
