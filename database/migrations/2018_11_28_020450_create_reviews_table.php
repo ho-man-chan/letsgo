@@ -18,7 +18,7 @@ class CreateReviewsTable extends Migration
             $table->integer('user_id');
             $table->string('business_id');
             $table->integer('stars');
-            $table->string('text');
+            $table->string('text')->nullable();
             $table->integer('userful')->default(0);
             $table->integer('funny')->default(0);
             $table->integer('cool')->default(0);
