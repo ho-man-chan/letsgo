@@ -43,12 +43,12 @@ class ReviewController extends Controller
           $validator = Validator::make($request->all(), [
               'business_id' => 'required',
               'stars' => 'required',
-              'text' => 'required',          
+              // 'text' => 'required',          
           ]);
           
           //check if already view
-          Review::where('user_id', Auth::user()-id)
-                  ->where('business_id', $request->business_id)
+          // reviewed_already = Review::where('user_id', Auth::user()-id)
+          //         ->where('business_id', $request->business_id)->get();
           
           if ($validator->fails()) {
               return response()->json(['error'=>$validator->errors()], 401);
