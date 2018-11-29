@@ -9,6 +9,7 @@ use Validator;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Collection;
+use Pusher\Laravel\Facades\Pusher;
 
 class RecommendController extends Controller
 {
@@ -22,17 +23,23 @@ class RecommendController extends Controller
     public function index(Request $request)
     {
         //checks for lat and long
-        // $validator = Validator::make($request->all(), [
-        //     'latitude' => 'required',
-        //     'longitude' => 'required',
-        // ]);
+        $validator = Validator::make($request->all(), [
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ]);
+  
+        $user = Auth::user();
+        $user_with_reviews = User::with(['reviews' => function($query) {
+          $query->orderBy('created_at', 'desc');
+        }])->find($user->id);
         
-        // $data = collect();
-        // $user = Auth::user();
-        // $user_with_reviews = User::with(['reviews' => function($query) {
-        //   $query->orderBy('created_at', 'desc');
-        // }])->find($user->id);
+        $coordinates->latitude =$request->latitude;
+        $coordinates->longitude =$request->longitude;
         
+        $user_with_reviews->coordinates = $coordinantes;
+        $user_with_reviews->user_id = $user->id;
+        
+        return response()->json(['success'=>$user_with_reviews], $this-> successStatus);
         
         // $user_with_reviews->user_id = $user_id;
         // $coordianates = "
@@ -138,7 +145,11 @@ class RecommendController extends Controller
         }
 
       });
+  
+      $response = collect(['success'=>$restaurants])->toJson();
       
+      // Log::info($response);
+      Pusher::trigger('my-channel', 'my-event', $response);
       return response()->json(['success'=>$restaurants], $this-> successStatus);
     }
 }
