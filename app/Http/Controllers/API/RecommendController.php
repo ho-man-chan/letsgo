@@ -24,7 +24,7 @@ class RecommendController extends Controller
     {
       return response()->json(['success'=> ''], $this-> successStatus);
       
-        // //checks for lat and long
+        //checks for lat and long
         // $validator = Validator::make($request->all(), [
         //     'latitude' => 'required',
         //     'longitude' => 'required',
@@ -35,14 +35,16 @@ class RecommendController extends Controller
         //   $query->orderBy('created_at', 'desc');
         // }])->find($user->id);
         // 
+        // $user_with_reviews->user_id = $user->id;
+        // $user_with_reviews_trimmed = $user_with_reviews->only(['user_id','reviews'])->all();
+        // 
+
+        // 
         // $coordinates->latitude = $request->latitude;
         // $coordinates->longitude = $request->longitude;
         // 
         // $user_with_reviews->coordinates = $coordinantes;
-        // $user_with_reviews->user_id = $user->id;
-        
-        // return response()->json(['success'=>$user_with_reviews], $this-> successStatus);
-        
+                
         // $user_with_reviews->user_id = $user_id;
         // $coordianates = "
         //   'coordinates': {
@@ -56,6 +58,7 @@ class RecommendController extends Controller
         
         // 
         // $user_with_reviews->user_id = $user->id;
+        // revu
         // $user_with_reviews_trimmed = $user_with_reviews->only(['user_id','reviews'])->all();
         // $user_with_reviews_trimmed->push("
         //   "coordinates": {
@@ -73,13 +76,13 @@ class RecommendController extends Controller
         
         // return $user_with_reviews_trimmed->to_json();
         // 
+        
         // $client = new \GuzzleHttp\Client([
         //       'base_uri' => env("LIVY_PATH"),
         // ]);
         // 
-        // //make call to livy
+        // // make call to livy
         // try {
-        // 
         //   $response = $client->request('POST', '/batches',
         //     [
         //       'json' => [ 
@@ -124,16 +127,9 @@ class RecommendController extends Controller
     
     public function search(Request $request)
     {
-        
-        $data['message'] = 'hello world';
-        Pusher::trigger('my-channel', 'my-event', $data);
-
-      // Pusher::trigger('my-channel', 'my-event', ['success' => $request->getContent()]);
-
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',       
         ]);
-        
         
         if ($validator->fails()) {
             return response()->json(['error'=>$validator->errors()], 401);
@@ -143,9 +139,7 @@ class RecommendController extends Controller
         
         //Convert request body to collection
         $restaurant_ids = collect(json_decode($request->getContent(),true));
-        
-        // Pusher::trigger('my-channel', 'my-event', $request->getContent());
-        
+                
         //get business details for all ids
         $restaurant_ids->each(function ($item, $key) use ($restaurants){
         
@@ -183,16 +177,9 @@ class RecommendController extends Controller
   
       $restaurants_array = $restaurants->toArray();
       $restaurant_response = array('success'=>$restaurants_array);
-      $restaurant_response_json = json_encode($restaurant_response, JSON_UNESCAPED_SLASHES);
-      Log::info($restaurant_response_json);
-      
-      // $response['success'] = $restaurants->toArray();
-      // $response_in_json = json_encode($response, JSON_UNESCAPED_SLASHES);
-      // Log::info(json_encode($response,JSON_UNESCAPED_SLASHES));
-      // Pusher::trigger('my-channel', 'my-event', json_encode($response, JSON_UNESCAPED_SLASHES));
-      // 
-      Pusher::trigger('my-channel', 'my-event',$restaurant_response);
-      // 
+    
+      Pusher::trigger('my-channel2', 'my-event',$restaurant_response);
+
       return response()->json(['success'=>$restaurants], $this-> successStatus);
     }
 }
