@@ -36,7 +36,7 @@ class RecommendController extends Controller
         $user = Auth::user();
         $reviews = Review::select('business_id','stars')->where('user_id', $user->id)->get();
         
-        $data['user_id'] = $user->id;
+        $data['user_id'] =(string) $user->id;
         $data['reviews'] = $reviews;
         $user_reviews = json_encode($data);
         $user_reviews_slashes = addslashes($user_reviews);
