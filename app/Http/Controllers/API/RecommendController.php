@@ -22,16 +22,18 @@ class RecommendController extends Controller
      */
     public function index(Request $request)
     {
-        //checks for lat and long
-        $validator = Validator::make($request->all(), [
-            'latitude' => 'required',
-            'longitude' => 'required',
-        ]);
-  
-        $user = Auth::user();
-        $user_with_reviews = User::with(['reviews' => function($query) {
-          $query->orderBy('created_at', 'desc');
-        }])->find($user->id);
+      return response()->json(['success'=> ''], $this-> successStatus);
+      
+        // //checks for lat and long
+        // $validator = Validator::make($request->all(), [
+        //     'latitude' => 'required',
+        //     'longitude' => 'required',
+        // ]);
+        // 
+        // $user = Auth::user();
+        // $user_with_reviews = User::with(['reviews' => function($query) {
+        //   $query->orderBy('created_at', 'desc');
+        // }])->find($user->id);
         // 
         // $coordinates->latitude = $request->latitude;
         // $coordinates->longitude = $request->longitude;
@@ -122,9 +124,11 @@ class RecommendController extends Controller
     
     public function search(Request $request)
     {
-      
-      Pusher::trigger('my-channel', 'my-event', ['success' => $request->getContent()]);
-      // Pusher::trigger('my-channel', 'my-event', {'hello':'world'});
+        
+        $data['message'] = 'hello world';
+        Pusher::trigger('my-channel', 'my-event', $data);
+
+      // Pusher::trigger('my-channel', 'my-event', ['success' => $request->getContent()]);
 
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',       
@@ -136,52 +140,59 @@ class RecommendController extends Controller
         }
         
         $restaurants = collect();
+        
+        //Convert request body to collection
         $restaurant_ids = collect(json_decode($request->getContent(),true));
         
         // Pusher::trigger('my-channel', 'my-event', $request->getContent());
         
+        //get business details for all ids
         $restaurant_ids->each(function ($item, $key) use ($restaurants){
         
-        //call api
-        $headers = array(
-            'User-Agent' => 'browser/1.0',
-            'Accept' => 'application/json',
-            'Authorization' => "Bearer " . env("YELP_TOKEN")
-        );
+          //call yelp to get the content of the business by id
+          $headers = array(
+              'User-Agent' => 'browser/1.0',
+              'Accept' => 'application/json',
+              'Authorization' => "Bearer " . env("YELP_TOKEN")
+          );
 
-        $client = new \GuzzleHttp\Client([
-            'base_uri' => 'https://api.yelp.com/',
-        ]);
+          $client = new \GuzzleHttp\Client([
+              'base_uri' => 'https://api.yelp.com/',
+          ]);
 
-        try {
-            $response = $client->request(
-                'GET',
-                "/v3/businesses/$key",
-                [
-                    'headers'=> $headers
-                ]
-            );
-            $response = $response->getBody()->getContents();
-            $restaurant = collect(json_decode($response, true));
-            $filtered_restaurant_element = $restaurant->only(['id','name','image_url','rating','location','coordinates','price'])->all();
-            
-            //add response to restaurants
-            $restaurants->push($filtered_restaurant_element);
-        } catch (RequestException $e) {
-            Log::error($e->getMessage());
-            return $e->getResponse();
-        }
+          try {
+              $response = $client->request(
+                  'GET',
+                  "/v3/businesses/$key",
+                  [
+                      'headers'=> $headers
+                  ]
+              );
+              $response = $response->getBody()->getContents();
+              $restaurant = collect(json_decode($response, true));
+              $filtered_restaurant_element = $restaurant->only(['id','name','image_url','rating','location','coordinates','price'])->all();
+              
+              //add response to restaurants
+              $restaurants->push($filtered_restaurant_element);
+          } catch (RequestException $e) {
+              Log::error($e->getMessage());
+              return $e->getResponse();
+          }
 
       });
   
-      $a = array('success'=>$restaurants);
-      $json = json_encode($a, JSON_UNESCAPED_SLASHES);
-      Log::info($json);
+      $restaurants_array = $restaurants->toArray();
+      $restaurant_response = array('success'=>$restaurants_array);
+      $restaurant_response_json = json_encode($restaurant_response, JSON_UNESCAPED_SLASHES);
+      Log::info($restaurant_response_json);
+      
       // $response['success'] = $restaurants->toArray();
       // $response_in_json = json_encode($response, JSON_UNESCAPED_SLASHES);
       // Log::info(json_encode($response,JSON_UNESCAPED_SLASHES));
       // Pusher::trigger('my-channel', 'my-event', json_encode($response, JSON_UNESCAPED_SLASHES));
-      // Pusher::trigger('my-channel', 'my-event', $json);
+      // 
+      Pusher::trigger('my-channel', 'my-event',$restaurant_response);
+      // 
       return response()->json(['success'=>$restaurants], $this-> successStatus);
     }
 }
