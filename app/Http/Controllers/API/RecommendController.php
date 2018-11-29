@@ -123,7 +123,8 @@ class RecommendController extends Controller
     public function search(Request $request)
     {
       
-      Pusher::trigger('my-channel', 'my-event', {"hello":"world"});
+      // Pusher::trigger('my-channel', 'my-event', ['success' => $request->getContent()]);
+      // Pusher::trigger('my-channel', 'my-event', {'hello':'world'});
 
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',       
@@ -137,7 +138,7 @@ class RecommendController extends Controller
         $restaurants = collect();
         $restaurant_ids = collect(json_decode($request->getContent(),true));
         
-          Pusher::trigger('my-channel', 'my-event', $request->getContent());
+        // Pusher::trigger('my-channel', 'my-event', $request->getContent());
         
         $restaurant_ids->each(function ($item, $key) use ($restaurants){
         
