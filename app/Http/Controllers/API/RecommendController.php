@@ -133,6 +133,9 @@ class RecommendController extends Controller
         
         $restaurants = collect();
         $restaurant_ids = collect(json_decode($request->getContent(),true));
+        
+          Pusher::trigger('my-channel', 'my-event', $request->getContent());
+        
         $restaurant_ids->each(function ($item, $key) use ($restaurants){
         
         //call api
@@ -167,12 +170,14 @@ class RecommendController extends Controller
 
       });
   
-      $response['success'] = $restaurants->toArray();
+      $a = array('success'=>$restaurants);
+      $json = json_encode($a, JSON_UNESCAPED_SLASHES);
+      Log::info($json);
+      // $response['success'] = $restaurants->toArray();
       // $response_in_json = json_encode($response, JSON_UNESCAPED_SLASHES);
-      Log::info(json_encode($response,JSON_UNESCAPED_SLASHES));
+      // Log::info(json_encode($response,JSON_UNESCAPED_SLASHES));
       // Pusher::trigger('my-channel', 'my-event', json_encode($response, JSON_UNESCAPED_SLASHES));
-      Pusher::trigger('my-channel', 'my-event', json_encode($response, JSON_UNESCAPED_SLASHES));
-
+      Pusher::trigger('my-channel', 'my-event', $json);
       return response()->json(['success'=>$restaurants], $this-> successStatus);
     }
 }
