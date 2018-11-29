@@ -32,14 +32,14 @@ class RecommendController extends Controller
         $user_with_reviews = User::with(['reviews' => function($query) {
           $query->orderBy('created_at', 'desc');
         }])->find($user->id);
+        // 
+        // $coordinates->latitude = $request->latitude;
+        // $coordinates->longitude = $request->longitude;
+        // 
+        // $user_with_reviews->coordinates = $coordinantes;
+        // $user_with_reviews->user_id = $user->id;
         
-        $coordinates->latitude =$request->latitude;
-        $coordinates->longitude =$request->longitude;
-        
-        $user_with_reviews->coordinates = $coordinantes;
-        $user_with_reviews->user_id = $user->id;
-        
-        return response()->json(['success'=>$user_with_reviews], $this-> successStatus);
+        // return response()->json(['success'=>$user_with_reviews], $this-> successStatus);
         
         // $user_with_reviews->user_id = $user_id;
         // $coordianates = "
@@ -69,7 +69,7 @@ class RecommendController extends Controller
         //    }"
         // );
         
-        return $user_with_reviews_trimmed->to_json();
+        // return $user_with_reviews_trimmed->to_json();
         // 
         // $client = new \GuzzleHttp\Client([
         //       'base_uri' => env("LIVY_PATH"),
@@ -81,12 +81,33 @@ class RecommendController extends Controller
         //   $response = $client->request('POST', '/batches',
         //     [
         //       'json' => [ 
-        //         'file' => 's3://coen424-data/src/predict.py',
+        //         'file' => 's3://coen424-data/src/als.py',
         //         'args' => [
-        //           (string)(Auth::user()->id)
-        //           (string),
-        //           (string)$request->latitude,
-        //           (string)$request->longitude]
+        //           '{
+        //             "user_id": "1",
+        //             "reviews": [
+        //               {
+        //                 "business_id": "Wpt0sFHcPtV5MO9He7yMKQ",
+        //                 "stars": 5.0
+        //               },
+        //               {
+        //                 "business_id": "WUiDaFQRZ8wKYGLvmjFjAw",
+        //                 "stars": 1.0
+        //               },
+        //               {
+        //                 "business_id": "akRtfcCezswizRIaAqJ4fQ",
+        //                 "stars": 5.0
+        //               },
+        //               {
+        //                 "business_id": "iPa__LOhse-hobC2Xmp-Kw",
+        //                 "stars": 5.0
+        //               }
+        //             ],
+        //             "coordinates": {
+        //               "latitude": 37.80587,
+        //               "longitude": -122.42058
+        //             }
+        //           }'
         //       ]
         //     ]
         //   );
@@ -146,10 +167,12 @@ class RecommendController extends Controller
 
       });
   
-      $response = collect(['success'=>$restaurants])->toJson();
-      
-      // Log::info($response);
-      Pusher::trigger('my-channel', 'my-event', $response);
+      $response['success'] = $restaurants->toArray();
+      // $response_in_json = json_encode($response, JSON_UNESCAPED_SLASHES);
+      Log::info(json_encode($response,JSON_UNESCAPED_SLASHES));
+      // Pusher::trigger('my-channel', 'my-event', json_encode($response, JSON_UNESCAPED_SLASHES));
+      Pusher::trigger('my-channel', 'my-event', json_encode($response, JSON_UNESCAPED_SLASHES));
+
       return response()->json(['success'=>$restaurants], $this-> successStatus);
     }
 }
