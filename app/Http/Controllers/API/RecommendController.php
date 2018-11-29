@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\User;
+use App\Review;
 use Illuminate\Support\Facades\Auth;
 use Validator;
 use GuzzleHttp\Exception\RequestException;
@@ -21,108 +22,52 @@ class RecommendController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
-    {
-      return response()->json(['success'=> ''], $this-> successStatus);
-      
+    {      
         //checks for lat and long
         // $validator = Validator::make($request->all(), [
         //     'latitude' => 'required',
         //     'longitude' => 'required',
         // ]);
         // 
-        // $user = Auth::user();
-        // $user_with_reviews = User::with(['reviews' => function($query) {
-        //   $query->orderBy('created_at', 'desc');
-        // }])->find($user->id);
-        // 
-        // $user_with_reviews->user_id = $user->id;
-        // $user_with_reviews_trimmed = $user_with_reviews->only(['user_id','reviews'])->all();
-        // 
-
-        // 
-        // $coordinates->latitude = $request->latitude;
-        // $coordinates->longitude = $request->longitude;
-        // 
-        // $user_with_reviews->coordinates = $coordinantes;
-                
-        // $user_with_reviews->user_id = $user_id;
-        // $coordianates = "
-        //   'coordinates': {
-        //      'latitude': $request->latitude,
-        //      'longitude': $request->longitude
-        //    }";
-        // 
-        //    json_$coordinates
-        // $user_with_reviews->coordinates = 
-        // return response()->json(['success'=>$user_with_reviews], $this-> successStatus);
-        
-        // 
-        // $user_with_reviews->user_id = $user->id;
-        // revu
-        // $user_with_reviews_trimmed = $user_with_reviews->only(['user_id','reviews'])->all();
-        // $user_with_reviews_trimmed->push("
-        //   "coordinates": {
-        //      "latitude": $request->latitude,
-        //      "longitude": $request->longitude
-        //    }"
-        // );
-        // 
-        // // $user_with_reviews_trimmed->push("
-        //   "coordinates": {
-        //      "latitude": $request->latitude,
-        //      "longitude": $request->longitude
-        //    }"
-        // );
-        
-        // return $user_with_reviews_trimmed->to_json();
-        // 
-        
-        // $client = new \GuzzleHttp\Client([
-        //       'base_uri' => env("LIVY_PATH"),
-        // ]);
-        // 
-        // // make call to livy
-        // try {
-        //   $response = $client->request('POST', '/batches',
-        //     [
-        //       'json' => [ 
-        //         'file' => 's3://coen424-data/src/als.py',
-        //         'args' => [
-        //           '{
-        //             "user_id": "1",
-        //             "reviews": [
-        //               {
-        //                 "business_id": "Wpt0sFHcPtV5MO9He7yMKQ",
-        //                 "stars": 5.0
-        //               },
-        //               {
-        //                 "business_id": "WUiDaFQRZ8wKYGLvmjFjAw",
-        //                 "stars": 1.0
-        //               },
-        //               {
-        //                 "business_id": "akRtfcCezswizRIaAqJ4fQ",
-        //                 "stars": 5.0
-        //               },
-        //               {
-        //                 "business_id": "iPa__LOhse-hobC2Xmp-Kw",
-        //                 "stars": 5.0
-        //               }
-        //             ],
-        //             "coordinates": {
-        //               "latitude": 37.80587,
-        //               "longitude": -122.42058
-        //             }
-        //           }'
-        //       ]
-        //     ]
-        //   );
-        // 
-        //     $response = $response->getBody()->getContents();
-        //     return $response;
-        // } catch (RequestException $e) {
-        //     Log::error($e->getMessage());
-        //     return $e->getResponse();
+        // if ($validator->fails()) {
+        //     return response()->json(['error'=>$validator->errors()], 401);
         // }
+        
+        $user = Auth::user();
+        $reviews = Review::select('business_id','stars')->where('user_id', $user->id)->get();
+        
+        $data['user_id'] = $user->id;
+        $data['reviews'] = $reviews;
+        $user_reviews = json_encode($data);
+        $user_reviews_slashes = addslashes($user_reviews);
+        
+        Log::info($user_reviews);
+        Log::info($user_reviews_slashes);
+        
+        $client = new \GuzzleHttp\Client([
+              'base_uri' => env("LIVY_PATH"),
+        ]);
+        
+        // make call to livy
+        try {
+            $response = $client->request('POST', '/batches',
+              [
+                'json' => [ 
+                  'file' => 's3://coen424-data/src/als.py',
+                  'args' => ["$user_reviews_slashes"]
+                ]
+              ]
+            );
+            
+            $response = $response->getBody()->getContents();
+            Log::info($response);
+            return response()->json(['success'=> $response], $this-> successStatus);
+        } catch (RequestException $e) {
+            Log::error($e->getMessage());
+            return $e->getResponse();
+            
+        }
+        return response()->json(['error'=> ''], $this-> successStatus);
     }
     
     public function search(Request $request)
