@@ -174,6 +174,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         
         Pusher\Laravel\PusherServiceProvider::class,
+        Bugsnag\BugsnagLaravel\BugsnagServiceProvider::class,
 
     ],
 

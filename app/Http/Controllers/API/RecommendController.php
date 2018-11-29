@@ -39,10 +39,10 @@ class RecommendController extends Controller
         $data['user_id'] =(string) $user->id;
         $data['reviews'] = $reviews;
         $user_reviews = json_encode($data);
-        $user_reviews_slashes = addslashes($user_reviews);
+        // $user_reviews_slashes = addslashes($user_reviews);
         
         Log::info($user_reviews);
-        Log::info($user_reviews_slashes);
+        // Log::info($user_reviews_slashes);
         
         $client = new \GuzzleHttp\Client([
               'base_uri' => env("LIVY_PATH"),
@@ -54,7 +54,7 @@ class RecommendController extends Controller
               [
                 'json' => [ 
                   'file' => 's3://coen424-data/src/als.py',
-                  'args' => ["$user_reviews_slashes"]
+                  'args' => ["$user_reviews"]
                 ]
               ]
             );
