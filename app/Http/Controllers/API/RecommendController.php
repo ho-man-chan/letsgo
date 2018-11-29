@@ -123,7 +123,7 @@ class RecommendController extends Controller
       $restaurants_array = $restaurants->toArray();
       $restaurant_response = array('success'=>$restaurants_array);
     
-      Pusher::trigger('my-channel2', 'my-event',$restaurant_response);
+      Pusher::trigger('my-channel', 'my-event',$restaurant_response);
 
       return response()->json(['success'=>$restaurants], $this-> successStatus);
     }
