@@ -123,7 +123,7 @@ class RecommendController extends Controller
     public function search(Request $request)
     {
       
-      // Pusher::trigger('my-channel', 'my-event', ['success' => $request->getContent()]);
+      Pusher::trigger('my-channel', 'my-event', ['success' => $request->getContent()]);
       // Pusher::trigger('my-channel', 'my-event', {'hello':'world'});
 
         $validator = Validator::make($request->all(), [
@@ -181,7 +181,7 @@ class RecommendController extends Controller
       // $response_in_json = json_encode($response, JSON_UNESCAPED_SLASHES);
       // Log::info(json_encode($response,JSON_UNESCAPED_SLASHES));
       // Pusher::trigger('my-channel', 'my-event', json_encode($response, JSON_UNESCAPED_SLASHES));
-      Pusher::trigger('my-channel', 'my-event', $json);
+      // Pusher::trigger('my-channel', 'my-event', $json);
       return response()->json(['success'=>$restaurants], $this-> successStatus);
     }
 }
