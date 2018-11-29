@@ -122,6 +122,9 @@ class RecommendController extends Controller
     
     public function search(Request $request)
     {
+      
+      Pusher::trigger('my-channel', 'my-event', {"hello":"world"});
+
         $validator = Validator::make($request->all(), [
             'user_id' => 'required',       
         ]);
